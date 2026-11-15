@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Moun Moun</title>
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Moun Moun">
+<meta name="theme-color" content="#f57c1f">
+<style>
+:root{--bg:#fff7ef;--card:#ffffffd9;--txt:#2b1a0e;--lar:#f57c1f}
+*{box-sizing:border-box;font-family:-apple-system,system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--txt);transition:background .4s;padding:env(safe-area-inset-top) 14px 40px}
+body.d1{--bg:#c8f0c9}body.d2{--bg:#fff1a8}body.d3{--bg:#ffc2bd}
+header{display:flex;align-items:center;gap:10px;padding:14px 0}header img{width:44px;height:44px;border-radius:11px}
+h1{font-size:24px;margin:0;color:var(--lar)}h2{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px;opacity:.7}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0001}
+.row{display:flex;gap:10px}.row>*{flex:1}
+label{font-size:13px;opacity:.75;display:block;margin:8px 0 4px}
+input,select{width:100%;padding:12px;font-size:17px;border:1px solid #0002;border-radius:12px;background:#fff}
+button{padding:13px;font-size:16px;border:0;border-radius:12px;background:var(--lar);color:#fff;font-weight:600;width:100%;margin-top:10px}
+button.sec{background:#0000000f;color:var(--txt)}
+.lado{display:flex;gap:10px;margin-top:6px}.lado button{margin:0;background:#fff;color:var(--txt);border:2px solid #0002}
+.lado button.on{background:var(--lar);color:#fff;border-color:var(--lar)}
+.big{font-size:30px;font-weight:700}.mini{font-size:13px;opacity:.7}
+.compra{background:#fff;border-left:6px solid #e53935}.compra div{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.compra button{width:auto;margin:0;padding:8px 12px;font-size:14px}
+.hist div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #0001;font-size:15px}
+.hist span.x{color:#c62828;padding-left:10px}
+.erro{color:#c62828;font-weight:600;margin-top:8px}
+svg text{font-family:-apple-system,system-ui,sans-serif}
+#pinbox{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;padding:30px;z-index:9}
+</style></head><body>
+<div id="pinbox"><img src="/icon-192.png" width="90"><h1>Moun Moun</h1><input id="pin" type="password" inputmode="numeric" placeholder="PIN" onkeyup="if(event.key==='Enter')salvarPin()"><button onclick="salvarPin()">Entrar</button></div>
+
+<header><img src="/apple-touch-icon.png"><div><h1>Moun Moun</h1><div class="mini" id="sub"></div></div></header>
+
+<div class="card compra" id="compras" style="display:none"><h2>🛒 Comprar</h2><div id="listaCompras"></div></div>
+
+<div class="card" style="text-align:center"><h2>Meu peso</h2><input id="peso" type="number" inputmode="decimal" step="0.1" placeholder="kg" style="font-size:32px;font-weight:700;text-align:center;color:var(--lar)"><div class="mini" id="pesoAnt"></div></div>
+
+<div class="card" style="text-align:center">
+  <h2>Lado da aplicação</h2>
+  <svg viewBox="0 0 240 230" width="230" id="boneco">
+    <path d="M70 10 Q60 60 52 120 Q46 170 62 220 L178 220 Q194 170 188 120 Q180 60 170 10 Z" fill="#f6d2b3" stroke="#c99a76" stroke-width="3"/>
+    <circle id="zE" cx="88" cy="150" r="26" fill="#f57c1f" opacity=".85"/>
+    <circle id="zD" cx="152" cy="150" r="26" fill="#f57c1f" opacity=".85"/>
+    <ellipse cx="120" cy="140" rx="5" ry="7" fill="#a8714f"/>
+    <text x="88" y="200" text-anchor="middle" font-size="14" font-weight="700">DIR</text>
+    <text x="152" y="200" text-anchor="middle" font-size="14" font-weight="700">ESQ</text>
+  </svg>
+  <div class="big" id="proxTxt"></div>
+  <div class="mini">(como no espelho)</div>
+</div>
+
+<div class="card">
+  <label>Data</label><input id="data" type="date">
+  <label>Dose (mg)</label><input id="mg" type="number" inputmode="decimal" step="0.5">
+  <label>Lado da aplicação</label>
+  <div class="lado"><button id="bE" onclick="setLado('E')">Esquerdo</button><button id="bD" onclick="setLado('D')">Direito</button></div>
+  <button onclick="dose()">Registrar aplicação</button><div class="erro" id="erro"></div>
+</div>
+
+<div class="card">
+  <h2>Ampola em uso</h2>
+  <div class="big" id="ampTxt"></div><div class="mini" id="ampSub"></div>
+</div>
+
+<div class="card">
+  <h2>Estoque</h2>
+  <div class="row" style="text-align:center">
+    <div><div class="big" id="nAmp"></div><div class="mini">ampolas fechadas</div></div>
+    <div><div class="big" id="nSer"></div><div class="mini">seringas</div></div>
+  </div>
+  <div class="row"><div><label>+ Ampolas</label><input id="addA" type="number" inputmode="numeric"></div><div><label>+ Seringas</label><input id="addS" type="number" inputmode="numeric"></div></div>
+  <button onclick="somar()">Adicionar ao estoque</button>
+</div>
+
+<div class="card hist"><h2>Histórico</h2><div id="hist"></div></div>
+
+<div class="card">
+  <h2>Ajustes</h2>
+  <div class="row"><div><label>mg por ampola</label><input id="cMg" type="number" inputmode="decimal"></div><div><label>Doses por ampola</label><input id="cDoses" type="number" inputmode="numeric"></div></div>
+  <label>Dose padrão (mg)</label><input id="cPad" type="number" inputmode="decimal">
+  <button class="sec" onclick="salvarConfig()">Salvar ajustes</button>
+  <div class="row"><div><label>Corrigir ampolas</label><input id="fixA" type="number"></div><div><label>Corrigir seringas</label><input id="fixS" type="number"></div></div>
+  <div class="row"><div><label>mg restantes na ampola em uso</label><input id="fixMg" type="number" step="0.5"></div><div><label>Doses já tomadas dela</label><input id="fixD" type="number"></div></div>
+  <button class="sec" onclick="corrigir()">Corrigir valores</button>
+  <button class="sec" onclick="ativarPush()">🔔 Ativar notificações</button>
+</div>
+
+<script>
+let S=null, lado='E';
+const $=id=>document.getElementById(id);
+const pin=()=>localStorage.getItem('mmpin')||'';
+async function api(rota,b){
+  const r=await fetch('/api/'+rota,{method:b?'POST':'GET',headers:{'Content-Type':'application/json','x-pin':pin()},body:b?JSON.stringify(b):undefined});
+  if(r.status===401){$('pinbox').style.display='flex';throw 0}
+  const j=await r.json(); if(!r.ok) throw new Error(j.erro); S=j;$("pinbox").style.display="none"; render(); return j;
+}
+function sair(){localStorage.removeItem("mmpin");$("pin").value="";$("pinbox").style.display="flex"}
+function salvarPin(){localStorage.setItem('mmpin',$('pin').value);$('pinbox').style.display='none';api('estado')}
+function setLado(l){lado=l;$('zD').style.display=l==='E'?'':'none';$('zE').style.display=l==='D'?'':'none';$('proxTxt').textContent='Lado '+(l==='E'?'esquerdo':'direito');$('bE').classList.toggle('on',l==='E');$('bD').classList.toggle('on',l==='D')}
+const fmtData=s=>new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+function render(){
+  const c=S.config,a=S.ampolaAtual;
+  const n=a?a.doses:0; document.body.className=n>=3?'d3':n?'d'+n:'';
+  const p=S.proximoLado;
+    if(!$('mg').value)$('mg').value=c.mgPadrao; if(!$('data').value)$('data').value=new Date().toLocaleDateString('sv'); setLado(p);
+  if(a){const rest=Math.max(0,Math.floor(a.mgRestante/(Number($('mg').value)||c.mgPadrao)));
+    $('ampTxt').textContent=a.mgRestante+' mg restantes';
+    $('ampSub').textContent=`${a.doses}ª dose tomada desta ampola · ${rest} dose(s) restante(s)`;}
+  else{$('ampTxt').textContent='Nenhuma aberta';$('ampSub').textContent='A próxima dose abre uma ampola nova';}
+  $('nAmp').textContent=S.estoque.ampolas;$('nSer').textContent=S.estoque.seringas;
+  const ult=S.aplicacoes.slice().sort((a,b)=>a.data.localeCompare(b.data)).pop();
+  {const pp=S.aplicacoes.filter(x=>x.peso).sort((a,b)=>a.data.localeCompare(b.data)).pop();$('pesoAnt').textContent=pp?'Último registro: '+pp.peso+' kg em '+fmtData(pp.data):'';}
+  $('sub').textContent=ult?`Última: ${fmtData(ult.data)} · ${ult.lado==='E'?'esquerdo':'direito'} · ${ult.mg} mg`:'Nenhuma aplicação ainda';
+  let comp='';
+  if(S.avisos.ampola)comp+=`<div>💉 Ampola <button onclick="comprei('ampola')">Comprei</button></div>`;
+  if(S.avisos.seringa)comp+=`<div>🩹 Seringas (restam ${S.estoque.seringas}) <button onclick="comprei('seringa')">Comprei</button></div>`;
+  $('compras').style.display=comp?'':'none';$('listaCompras').innerHTML=comp;
+  const meses={};S.aplicacoes.slice().sort((a,b)=>b.data.localeCompare(a.data)).forEach(x=>{const k=new Date(x.data).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});(meses[k]=meses[k]||[]).push(x)});
+  const mesAtual=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  $('hist').innerHTML=Object.entries(meses).map(([m,l])=>`<details ${m===mesAtual?'open':''}><summary style="font-weight:700;padding:10px 0;text-transform:capitalize">${m} · ${l.length} dose(s)</summary>`+l.map(x=>`<div><span>${fmtData(x.data)}</span><span>${x.lado==='E'?'⬅️ Esq':'Dir ➡️'}</span><span>${x.mg} mg</span><span>${x.peso?x.peso+' kg':'—'}<span class="x" onclick="apagar(${x.id})">✕</span></span></div>`).join('')+'</details>').join('')||'<div class="mini">Vazio</div>';
+  $('cMg').value=c.mgPorAmpola;$('cDoses').value=c.dosesPorAmpola;$('cPad').value=c.mgPadrao;
+}
+async function dose(){$('erro').textContent='';
+  try{const d=$('data').value?new Date($('data').value+'T12:00').toISOString():null;
+    await api('dose',{lado,mg:$('mg').value,peso:$('peso').value,data:d});$('peso').value='';$('data').value='';}
+  catch(e){if(e)$('erro').textContent=e.message}}
+async function somar(){await api('estoque',{modo:'somar',ampolas:Number($('addA').value||0),seringas:Number($('addS').value||0)});$('addA').value=$('addS').value=''}
+async function comprei(item){await api('comprei',{item})}
+async function apagar(id){if(confirm('Apagar este registro? (não devolve ao estoque)'))await api('apagar',{id})}
+async function salvarConfig(){await api('config',{mgPorAmpola:$('cMg').value,dosesPorAmpola:$('cDoses').value,mgPadrao:$('cPad').value})}
+async function corrigir(){
+  const b={};if($('fixA').value!=='')b.ampolas=$('fixA').value;if($('fixS').value!=='')b.seringas=$('fixS').value;
+  if(Object.keys(b).length)await api('estoque',b);
+  if($('fixMg').value!=='')await api('ampola',{mgRestante:$('fixMg').value,doses:$('fixD').value||0});
+  ['fixA','fixS','fixMg','fixD'].forEach(i=>$(i).value='');
+}
+async function ativarPush(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return alert('No iPhone: adicione o app à Tela de Início primeiro (Compartilhar → Adicionar à Tela de Início) e abra por lá.');
+  const reg=await navigator.serviceWorker.register('/sw.js');
+  if(await Notification.requestPermission()!=='granted')return alert('Permissão negada');
+  const k=S.vapidPublic.replace(/-/g,'+').replace(/_/g,'/');const raw=atob(k+'='.repeat((4-k.length%4)%4));
+  const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:Uint8Array.from(raw,c=>c.charCodeAt(0))});
+  await api('sub',sub.toJSON());await api('teste',{});
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');
+api('estado').catch(()=>{});
+</script></body></html>

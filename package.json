@@ -1,0 +1,7 @@
+{
+  "name": "moun-moun",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "web-push": "^3.6.7" }
+}
