@@ -102,6 +102,7 @@ http.createServer(async (req, res) => {
         case '/api/config': Object.assign(d.config, Object.fromEntries(Object.entries(b).map(([k, v]) => [k, Number(v)]))); break;
         case '/api/ampola': d.ampolaAtual = b.mgRestante == null ? null : { mgRestante: Number(b.mgRestante), doses: Number(b.doses || 0) }; break;
         case '/api/apagar': d.aplicacoes = d.aplicacoes.filter(a => a.id !== b.id); break;
+        case '/api/reset': d.aplicacoes = []; d.ampolaAtual = null; d.estoque = { ampolas: 0, seringas: 0 }; d.avisos = { ampola: false, seringa: false }; break;
         case '/api/sub': if (!d.subs.find(s => s.endpoint === b.endpoint)) d.subs.push(b); break;
         case '/api/teste': await notificar(d, 'Moun Moun', 'Notificações funcionando ✅'); break;
         default: return send(404, { erro: 'rota' });
