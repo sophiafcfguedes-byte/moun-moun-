@@ -37,18 +37,9 @@ svg text{font-family:-apple-system,system-ui,sans-serif}
 
 <div class="card" style="text-align:center"><h2>Meu peso</h2><input id="peso" type="number" inputmode="decimal" step="0.1" placeholder="kg" style="font-size:32px;font-weight:700;text-align:center;color:var(--lar)"><div class="mini" id="pesoAnt"></div></div>
 
-<div class="card" style="text-align:center">
-  <h2>Lado da aplicação</h2>
-  <svg viewBox="0 0 240 230" width="230" id="boneco">
-    <path d="M70 10 Q60 60 52 120 Q46 170 62 220 L178 220 Q194 170 188 120 Q180 60 170 10 Z" fill="#f6d2b3" stroke="#c99a76" stroke-width="3"/>
-    <circle id="zE" cx="88" cy="150" r="26" fill="#f57c1f" opacity=".85"/>
-    <circle id="zD" cx="152" cy="150" r="26" fill="#f57c1f" opacity=".85"/>
-    <ellipse cx="120" cy="140" rx="5" ry="7" fill="#a8714f"/>
-    <text x="88" y="200" text-anchor="middle" font-size="14" font-weight="700">DIR</text>
-    <text x="152" y="200" text-anchor="middle" font-size="14" font-weight="700">ESQ</text>
-  </svg>
-  <div class="big" id="proxTxt"></div>
-  <div class="mini">(como no espelho)</div>
+<div class="card">
+  <h2>Última aplicação</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:16px" id="tabUlt"></table>
 </div>
 
 <div class="card">
@@ -98,7 +89,7 @@ async function api(rota,b){
 }
 function sair(){localStorage.removeItem("mmpin");$("pin").value="";$("pinbox").style.display="flex"}
 function salvarPin(){localStorage.setItem('mmpin',$('pin').value);$('pinbox').style.display='none';api('estado')}
-function setLado(l){lado=l;$('zD').style.display=l==='E'?'':'none';$('zE').style.display=l==='D'?'':'none';$('proxTxt').textContent='Lado '+(l==='E'?'esquerdo':'direito');$('bE').classList.toggle('on',l==='E');$('bD').classList.toggle('on',l==='D')}
+function setLado(l){lado=l;$('bE').classList.toggle('on',l==='E');$('bD').classList.toggle('on',l==='D')}
 const fmtData=s=>new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
 function render(){
   const c=S.config,a=S.ampolaAtual;
@@ -112,6 +103,8 @@ function render(){
   $('nAmp').textContent=S.estoque.ampolas;$('nSer').textContent=S.estoque.seringas;
   const ult=S.aplicacoes.slice().sort((a,b)=>a.data.localeCompare(b.data)).pop();
   {const pp=S.aplicacoes.filter(x=>x.peso).sort((a,b)=>a.data.localeCompare(b.data)).pop();$('pesoAnt').textContent=pp?'Último registro: '+pp.peso+' kg em '+fmtData(pp.data):'';}
+  {const td='style="padding:9px 4px;border-bottom:1px solid #0001"';const L=x=>x==='E'?'Esquerdo':'Direito';
+   $('tabUlt').innerHTML=ult?`<tr><td ${td}>Local</td><td ${td}><b>${L(ult.lado)}</b></td></tr><tr><td ${td}>Data</td><td ${td}>${fmtData(ult.data)}</td></tr><tr><td ${td}>Dose</td><td ${td}>${ult.mg} mg</td></tr><tr><td ${td}>Próxima</td><td ${td} style="color:var(--lar);font-weight:700">${L(S.proximoLado)}</td></tr>`:'<tr><td class="mini">Nenhuma aplicação ainda</td></tr>';}
   $('sub').textContent=ult?`Última: ${fmtData(ult.data)} · ${ult.lado==='E'?'esquerdo':'direito'} · ${ult.mg} mg`:'Nenhuma aplicação ainda';
   let comp='';
   if(S.avisos.ampola)comp+=`<div>💉 Ampola <button onclick="comprei('ampola')">Comprei</button></div>`;
