@@ -104,7 +104,7 @@ function render(){
   const ult=S.aplicacoes.slice().sort((a,b)=>a.data.localeCompare(b.data)).pop();
   {const pp=S.aplicacoes.filter(x=>x.peso).sort((a,b)=>a.data.localeCompare(b.data)).pop();$('pesoAnt').textContent=pp?'Último registro: '+pp.peso+' kg em '+fmtData(pp.data):'';}
   {const td='style="padding:9px 4px;border-bottom:1px solid #0001"';const L=x=>x==='E'?'Esquerdo':'Direito';
-   $('tabUlt').innerHTML=ult?`<tr><td ${td}>Local</td><td ${td}><b>${L(ult.lado)}</b></td></tr><tr><td ${td}>Data</td><td ${td}>${fmtData(ult.data)}</td></tr><tr><td ${td}>Dose</td><td ${td}>${ult.mg} mg</td></tr><tr><td ${td}>Próxima</td><td ${td} style="color:var(--lar);font-weight:700">${L(S.proximoLado)}</td></tr>`:'<tr><td class="mini">Nenhuma aplicação ainda</td></tr>';}
+   $('tabUlt').innerHTML=ult?`<tr><td ${td}>Local</td><td ${td}><b>${L(ult.lado)}</b></td></tr><tr><td ${td}>Data</td><td ${td}>${fmtData(ult.data)}</td></tr><tr><td ${td}>Dose</td><td ${td}>${ult.mg} mg</td></tr><tr><td ${td}>Próxima</td><td ${td} style="color:var(--lar);font-weight:700">${L(S.proximoLado)} · quinta, ${(()=>{const d=new Date(ult.data);d.setDate(d.getDate()+((4-d.getDay()+7)%7||7));return fmtData(d)})()}</td></tr>`:'<tr><td class="mini">Nenhuma aplicação ainda</td></tr>';}
   $('sub').textContent=ult?`Última: ${fmtData(ult.data)} · ${ult.lado==='E'?'esquerdo':'direito'} · ${ult.mg} mg`:'Nenhuma aplicação ainda';
   let comp='';
   if(S.avisos.ampola)comp+=`<div>💉 Ampola <button onclick="comprei('ampola')">Comprei</button></div>`;
